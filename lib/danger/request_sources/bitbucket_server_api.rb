@@ -1,4 +1,5 @@
 # coding: utf-8
+
 require "danger/helpers/comments_helper"
 
 module Danger
@@ -10,7 +11,10 @@ module Danger
         @username = environment["DANGER_BITBUCKETSERVER_USERNAME"]
         @password = environment["DANGER_BITBUCKETSERVER_PASSWORD"]
         self.host = environment["DANGER_BITBUCKETSERVER_HOST"]
-        self.pr_api_endpoint = "https://#{host}/rest/api/1.0/projects/#{project}/repos/#{slug}/pull-requests/#{pull_request_id}"
+        if self.host && !(self.host.include? "http://") && !(self.host.include? "https://")
+          self.host = "https://" + self.host
+        end
+        self.pr_api_endpoint = "#{host}/rest/api/1.0/projects/#{project}/repos/#{slug}/pull-requests/#{pull_request_id}"
       end
 
       def inspect
@@ -50,10 +54,14 @@ module Danger
 
       private
 
+      def use_ssl
+        return self.pr_api_endpoint.include? "https://"
+      end
+
       def fetch_json(uri)
         req = Net::HTTP::Get.new(uri.request_uri, { "Content-Type" => "application/json" })
         req.basic_auth @username, @password
-        res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+        res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: use_ssl) do |http|
           http.request(req)
         end
         JSON.parse(res.body, symbolize_names: true)
@@ -64,7 +72,7 @@ module Danger
         req.basic_auth @username, @password
         req.body = body
 
-        res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+        res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: use_ssl) do |http|
           http.request(req)
         end
 
@@ -79,7 +87,7 @@ module Danger
       def delete(uri)
         req = Net::HTTP::Delete.new(uri.request_uri, { "Content-Type" => "application/json" })
         req.basic_auth @username, @password
-        Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+        Net::HTTP.start(uri.hostname, uri.port, use_ssl: use_ssl) do |http|
           http.request(req)
         end
       end

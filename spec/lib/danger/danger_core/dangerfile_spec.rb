@@ -61,9 +61,9 @@ RSpec.describe Danger::Dangerfile, host: :github do
 
       dm.parse Pathname.new(""), code
 
-      expect(dm).to receive(:print_list).with("Errors:".red, violations(["Another error", "An error"], sticky: false))
-      expect(dm).to receive(:print_list).with("Warnings:".yellow, violations(["Another warning", "A warning"], sticky: false))
-      expect(dm).to receive(:print_list).with("Messages:", violations(["A message"], sticky: false))
+      expect(dm).to receive(:print_list).with("Errors:".red, violations_factory(["Another error", "An error"], sticky: false))
+      expect(dm).to receive(:print_list).with("Warnings:".yellow, violations_factory(["Another warning", "A warning"], sticky: false))
+      expect(dm).to receive(:print_list).with("Messages:", violations_factory(["A message"], sticky: false))
 
       dm.print_results
     end
@@ -123,17 +123,21 @@ RSpec.describe Danger::Dangerfile, host: :github do
       dm = testing_dangerfile
       methods = dm.core_dsl_attributes.map { |hash| hash[:methods] }.flatten.sort
 
-      expect(methods).to eq [:fail, :markdown, :message, :status_report, :violation_report, :warn]
+      expect(methods).to eq %i(fail markdown message status_report violation_report warn)
     end
 
     # These are things that require scoped access
     it "exposes no external attributes by default" do
       dm = testing_dangerfile
       methods = dm.external_dsl_attributes.map { |hash| hash[:methods] }.flatten.sort
-      expect(methods).to eq [
-        :added_files, :api, :base_commit, :branch_for_base, :branch_for_head, :commits, :deleted_files,
-        :deletions, :diff_for_file, :head_commit, :html_link, :import_dangerfile, :import_plugin, :info_for_file, :insertions, :lines_of_code, :modified_files, :mr_author, :mr_body, :mr_json, :mr_labels, :mr_title, :pr_author, :pr_body, :pr_diff, :pr_json, :pr_labels, :pr_title, :scm_provider
-      ]
+      expect(methods).to eq %i(
+        added_files api base_commit branch_for_base branch_for_head commits
+        deleted_files deletions diff diff_for_file dismiss_out_of_range_messages
+        head_commit html_link import_dangerfile import_plugin info_for_file
+        insertions lines_of_code modified_files mr_author mr_body mr_json
+        mr_labels mr_title pr_author pr_body pr_diff pr_json pr_labels
+        pr_title renamed_files review scm_provider
+      )
     end
 
     it "exposes all external plugin attributes by default" do
@@ -162,6 +166,8 @@ RSpec.describe Danger::Dangerfile, host: :github do
         @dm.env.request_source.support_tokenless_auth = true
 
         # Stub out the GitHub stuff
+        pr_reviews_response = JSON.parse(fixture("github_api/pr_reviews_response"))
+        allow(@dm.env.request_source.client).to receive(:pull_request_reviews).with("artsy/eigen", "800").and_return(pr_reviews_response)
         pr_response = JSON.parse(fixture("github_api/pr_response"))
         allow(@dm.env.request_source.client).to receive(:pull_request).with("artsy/eigen", "800").and_return(pr_response)
         issue_response = JSON.parse(fixture("github_api/issue_response"))
@@ -199,17 +205,22 @@ RSpec.describe Danger::Dangerfile, host: :github do
         # Ensure consistent ordering, and only extract the keys
         data = sort_data(data).map { |d| d.first.to_sym }
 
-        expect(data).to eq [
-          :added_files, :api, :base_commit, :branch_for_base, :branch_for_head, :commits, :deleted_files, :deletions, :head_commit,
-          :insertions, :lines_of_code, :modified_files,
-          :mr_author, :mr_body, :mr_json, :mr_labels, :mr_title,
-          :pr_author, :pr_body, :pr_diff, :pr_json, :pr_labels, :pr_title, :scm_provider
-        ]
+        expect(data).to eq %i(
+          added_files api base_commit branch_for_base branch_for_head commits
+          deleted_files deletions diff head_commit insertions lines_of_code
+          modified_files mr_author mr_body mr_json mr_labels mr_title
+          pr_author pr_body pr_diff pr_json pr_labels pr_title
+          renamed_files review scm_provider
+        )
       end
 
       it "skips raw PR/MR JSON, and diffs" do
         data = @dm.method_values_for_plugin_hashes(@dm.external_dsl_attributes)
-        data_hash = Hash[*data.collect { |v| [v.first, v.last] }.flatten]
+
+        data_hash = data
+          .collect { |v| [v.first, v.last] }
+          .flat_map
+          .each_with_object({}) { |vals, accum| accum.store(vals[0], vals[1]) }
 
         expect(data_hash["pr_json"]).to eq("[Skipped JSON]")
         expect(data_hash["mr_json"]).to eq("[Skipped JSON]")
@@ -249,6 +260,39 @@ RSpec.describe Danger::Dangerfile, host: :github do
       expect(scm).to receive(:diff_for_folder)
 
       dm.setup_for_running("custom_danger_base", "custom_danger_head")
+    end
+  end
+
+  describe "#run" do
+    context "when exception occured" do
+      before { allow(Danger).to receive(:danger_outdated?).and_return(false) }
+
+      it "updates PR with an error" do
+        path = Pathname.new(File.join("spec", "fixtures", "dangerfile_with_error"))
+        env_manager = double("Danger::EnvironmentManager", {
+          pr?: false,
+          clean_up: true,
+          fill_environment_vars: true,
+          ensure_danger_branches_are_setup: false
+        })
+        scm = double("Danger::GitRepo", {
+          class: Danger::GitRepo,
+          diff_for_folder: true
+        })
+        request_source = double("Danger::RequestSources::GitHub")
+        dm = Danger::Dangerfile.new(env_manager, testing_ui)
+
+        allow(env_manager).to receive(:scm) { scm }
+        allow(env_manager).to receive(:request_source) { request_source }
+
+        expect(request_source).to receive(:update_pull_request!)
+
+        expect do
+          dm.run("custom_danger_base", "custom_danger_head", path, 1, false)
+        end.to raise_error(Danger::DSLError)
+      end
+
+      after { allow(Danger).to receive(:danger_outdated?).and_call_original }
     end
   end
 end

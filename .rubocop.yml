@@ -71,7 +71,7 @@ Style/AndOr:
 
 # Configuration parameters: CountComments.
 Metrics/ClassLength:
-  Max: 320
+  Max: 350
 
 Metrics/CyclomaticComplexity:
   Max: 17
@@ -121,4 +121,33 @@ Style/MultilineMethodCallIndentation:
 
 # FIXME: 25
 Metrics/BlockLength:
-  Max: 31
+  Max: 345
+  Exclude:
+    - "**/*_spec.rb"
+
+Style/MixinGrouping:
+  Enabled: false
+
+Style/FileName:
+  Enabled: false
+
+Style/IndentHeredoc:
+  Enabled: false
+
+Style/SpecialGlobalVars:
+  Enabled: false
+
+PercentLiteralDelimiters:
+  PreferredDelimiters:
+    "%":  ()
+    "%i": ()
+    "%q": ()
+    "%Q": ()
+    "%r": "{}"
+    "%s": ()
+    "%w": ()
+    "%W": ()
+    "%x": ()
+
+Security/YAMLLoad:
+  Enabled: false

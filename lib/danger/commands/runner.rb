@@ -12,7 +12,7 @@ module Danger
       CLAide::Plugins::Configuration.new(
         "Danger",
         "danger",
-        "https://raw.githubusercontent.com/danger/danger.systems/master/plugins-search-generated.json",
+        "https://gitlab.com/danger-systems/danger.systems/raw/master/plugins-search-generated.json",
         "https://github.com/danger/danger-plugin-template"
       )
 
@@ -58,7 +58,7 @@ module Danger
         ["--fail-on-errors=<true|false>", "Should always fail the build process, defaults to false"],
         ["--dangerfile=<path/to/dangerfile>", "The location of your Dangerfile"],
         ["--danger_id=<id>", "The identifier of this Danger instance"],
-        ["--new-comment", "Makes Danger post a new comment instead of editing it's previous one"]
+        ["--new-comment", "Makes Danger post a new comment instead of editing its previous one"]
       ].concat(super)
     end
 

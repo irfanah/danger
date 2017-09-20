@@ -1,6 +1,6 @@
 # Following the advice from @czechboy0 https://github.com/danger/danger/issues/171
 # https://github.com/czechboy0/Buildasaur
-require "danger/request_sources/github"
+require "danger/request_sources/github/github"
 
 module Danger
   # ### CI Setup
@@ -29,7 +29,8 @@ module Danger
     def supported_request_sources
       @supported_request_sources ||= [
         Danger::RequestSources::GitHub,
-        Danger::RequestSources::BitbucketServer
+        Danger::RequestSources::BitbucketServer,
+        Danger::RequestSources::BitbucketCloud
       ]
     end
 

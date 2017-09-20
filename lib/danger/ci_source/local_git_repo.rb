@@ -3,7 +3,7 @@
 require "git"
 require "uri"
 
-require "danger/request_sources/github"
+require "danger/request_sources/github/github"
 
 require "danger/ci_source/support/find_repo_info_from_url"
 require "danger/ci_source/support/find_repo_info_from_logs"
@@ -29,7 +29,7 @@ module Danger
     end
 
     def run_git(command)
-      git.exec command
+      git.exec(command).encode("UTF-8", "binary", invalid: :replace, undef: :replace, replace: "")
     end
 
     def supported_request_sources

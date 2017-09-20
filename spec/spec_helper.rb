@@ -34,6 +34,7 @@ RSpec.configure do |config|
   config.include Danger::Support::GitHubHelper, host: :github
   config.include Danger::Support::BitbucketServerHelper, host: :bitbucket_server
   config.include Danger::Support::BitbucketCloudHelper, host: :bitbucket_cloud
+  config.include Danger::Support::VSTSHelper, host: :vsts
   config.include Danger::Support::CIHelper, use: :ci_helper
 end
 
@@ -51,14 +52,21 @@ end
 # rubocop:disable Lint/NestedMethodDefinition
 def testing_ui
   @output = StringIO.new
+  @err = StringIO.new
+
   def @output.winsize
     [20, 9999]
   end
 
-  cork = Cork::Board.new(out: @output)
+  cork = Cork::Board.new(out: @output, err: @err)
   def cork.string
     out.string.gsub(/\e\[([;\d]+)?m/, "")
   end
+
+  def cork.err_string
+    err.string.gsub(/\e\[([;\d]+)?m/, "")
+  end
+
   cork
 end
 # rubocop:enable Lint/NestedMethodDefinition
@@ -84,20 +92,20 @@ def diff_fixture(file)
   File.read("spec/fixtures/#{file}.diff")
 end
 
-def violation(message, sticky: false)
-  Danger::Violation.new(message, sticky)
+def violation_factory(message, sticky: false, file: nil, line: nil)
+  Danger::Violation.new(message, sticky, file, line)
 end
 
-def violations(messages, sticky: false)
-  messages.map { |s| violation(s, sticky: sticky) }
+def violations_factory(messages, sticky: false)
+  messages.map { |s| violation_factory(s, sticky: sticky) }
 end
 
-def markdown(message)
+def markdown_factory(message)
   Danger::Markdown.new(message)
 end
 
-def markdowns(messages)
-  messages.map { |s| markdown(s) }
+def markdowns_factory(messages)
+  messages.map { |s| markdown_factory(s) }
 end
 
 def with_git_repo(origin: "git@github.com:artsy/eigen")

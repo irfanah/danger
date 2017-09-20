@@ -4,12 +4,12 @@ RSpec.describe Danger::DangerfileGitLabPlugin, host: :gitlab do
   before do
     stub_merge_request(
       "merge_request_593728_response",
-      "k0nserv/danger-test",
+      "k0nserv%2Fdanger-test",
       593_728
     )
     stub_merge_request_commits(
       "merge_request_593728_commits_response",
-      "k0nserv/danger-test",
+      "k0nserv%2Fdanger-test",
       593_728
     )
   end
@@ -40,7 +40,7 @@ RSpec.describe Danger::DangerfileGitLabPlugin, host: :gitlab do
     before do
       stub_merge_request_changes(
         "merge_request_593728_changes_response",
-        "k0nserv/danger-test",
+        "k0nserv\%2Fdanger-test",
         593_728
       )
     end
@@ -65,14 +65,14 @@ RSpec.describe Danger::DangerfileGitLabPlugin, host: :gitlab do
       with_git_repo(origin: "git@gitlab.com:k0nserv/danger-test.git") do
         dangerfile.env.request_source.fetch_details
 
-        [
-          :id, :iid, :project_id, :title, :description, :state, :created_at,
-          :updated_at, :target_branch, :source_branch, :upvotes, :downvotes,
-          :author, :assignee, :source_project_id, :target_project_id, :labels,
-          :work_in_progress, :milestone, :merge_when_build_succeeds, :merge_status,
-          :subscribed, :user_notes_count, :approvals_before_merge,
-          :should_remove_source_branch, :force_remove_source_branch
-        ].each do |key|
+        %i(
+          id iid project_id title description state created_at
+          updated_at target_branch source_branch upvotes downvotes
+          author assignee source_project_id target_project_id labels
+          work_in_progress milestone merge_when_build_succeeds merge_status
+          subscribed user_notes_count approvals_before_merge
+          should_remove_source_branch force_remove_source_branch
+        ).each do |key|
           key_present = plugin.pr_json.key?(key.to_s)
           expect(key_present).to be_truthy, "Expected key #{key} not found"
         end

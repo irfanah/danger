@@ -1,4 +1,5 @@
 # coding: utf-8
+
 require "erb"
 
 require "danger/request_sources/gitlab"
@@ -21,7 +22,7 @@ RSpec.describe Danger::RequestSources::GitLab, host: :gitlab do
 
   describe "the GitLab API endpoint" do
     it "sets the default GitLab API endpoint" do
-      expect(subject.endpoint).to eq("https://gitlab.com/api/v3")
+      expect(subject.endpoint).to eq("https://gitlab.com/api/v4")
     end
 
     it "allows the GitLab API endpoint to be overidden with `DANGER_GITLAB_API_BASE_URL`" do
@@ -39,7 +40,7 @@ RSpec.describe Danger::RequestSources::GitLab, host: :gitlab do
     end
 
     it "set the default API endpoint" do
-      expect(subject.client.endpoint).to eq("https://gitlab.com/api/v3")
+      expect(subject.client.endpoint).to eq("https://gitlab.com/api/v4")
     end
 
     it "respects overriding the API endpoint" do
@@ -83,17 +84,17 @@ RSpec.describe Danger::RequestSources::GitLab, host: :gitlab do
     before do
       stub_merge_request(
         "merge_request_593728_response",
-        "k0nserv/danger-test",
+        "k0nserv%2Fdanger-test",
         593_728
       )
       stub_merge_request_commits(
         "merge_request_593728_commits_response",
-        "k0nserv/danger-test",
+        "k0nserv%2Fdanger-test",
         593_728
       )
       @comments_stub = stub_merge_request_comments(
         "merge_request_593728_comments_response",
-        "k0nserv/danger-test",
+        "k0nserv%2Fdanger-test",
         593_728
       )
     end
@@ -155,19 +156,19 @@ RSpec.describe Danger::RequestSources::GitLab, host: :gitlab do
     describe "#update_pull_request!" do
       it "creates a new comment when there is not one already" do
         body = subject.generate_comment(
-          warnings: violations(["Test warning"]),
-          errors: violations(["Test error"]),
-          messages: violations(["Test message"]),
+          warnings: violations_factory(["Test warning"]),
+          errors: violations_factory(["Test error"]),
+          messages: violations_factory(["Test message"]),
           template: "gitlab"
         )
-        stub_request(:post, "https://gitlab.com/api/v3/projects/k0nserv%2Fdanger-test/merge_requests/593728/notes").with(
+        stub_request(:post, "https://gitlab.com/api/v4/projects/k0nserv%2Fdanger-test/merge_requests/593728/notes").with(
           body: "body=#{ERB::Util.url_encode(body)}",
           headers: expected_headers
         ).to_return(status: 200, body: "", headers: {})
         subject.update_pull_request!(
-          warnings: violations(["Test warning"]),
-          errors: violations(["Test error"]),
-          messages: violations(["Test message"])
+          warnings: violations_factory(["Test warning"]),
+          errors: violations_factory(["Test error"]),
+          messages: violations_factory(["Test message"])
         )
       end
 
@@ -177,7 +178,7 @@ RSpec.describe Danger::RequestSources::GitLab, host: :gitlab do
 
           @comments_stub = stub_merge_request_comments(
             "merge_request_593728_comments_existing_danger_comment_response",
-            "k0nserv/danger-test",
+            "k0nserv%2Fdanger-test",
             593_728
           )
         end
@@ -185,23 +186,25 @@ RSpec.describe Danger::RequestSources::GitLab, host: :gitlab do
         it "updates the existing comment instead of creating a new one" do
           allow(subject).to receive(:random_compliment).and_return("random compliment")
           body = subject.generate_comment(
-            warnings: violations(["New Warning"]),
+            warnings: violations_factory(["New Warning"]),
             errors: [],
             messages: [],
             previous_violations: {
               warning: [],
-              error: violations(["Test error"]),
+              error: violations_factory(["Test error"]),
               message: []
             },
             template: "gitlab"
           )
-          stub_request(:put, "https://gitlab.com/api/v3/projects/k0nserv%2Fdanger-test/merge_requests/593728/notes/13471894").with(
-            body: "body=#{ERB::Util.url_encode(body)}",
+          stub_request(:put, "https://gitlab.com/api/v4/projects/k0nserv%2Fdanger-test/merge_requests/593728/notes/13471894").with(
+            body: {
+              body: body
+            },
             headers: expected_headers
           ).to_return(status: 200, body: "", headers: {})
 
           subject.update_pull_request!(
-            warnings: violations(["New Warning"]),
+            warnings: violations_factory(["New Warning"]),
             errors: [],
             messages: []
           )
@@ -209,19 +212,21 @@ RSpec.describe Danger::RequestSources::GitLab, host: :gitlab do
 
         it "creates a new comment instead of updating the existing one if --new-comment is provided" do
           body = subject.generate_comment(
-            warnings: violations(["Test warning"]),
-            errors: violations(["Test error"]),
-            messages: violations(["Test message"]),
+            warnings: violations_factory(["Test warning"]),
+            errors: violations_factory(["Test error"]),
+            messages: violations_factory(["Test message"]),
             template: "gitlab"
           )
-          stub_request(:put, "https://gitlab.com/api/v3/projects/k0nserv%2Fdanger-test/merge_requests/593728/notes/13471894").with(
-            body: "body=#{ERB::Util.url_encode(body)}",
+          stub_request(:put, "https://gitlab.com/api/v4/projects/k0nserv%2Fdanger-test/merge_requests/593728/notes/13471894").with(
+            body: {
+              body: body
+            },
             headers: expected_headers
           ).to_return(status: 200, body: "", headers: {})
           subject.update_pull_request!(
-            warnings: violations(["Test warning"]),
-            errors: violations(["Test error"]),
-            messages: violations(["Test message"]),
+            warnings: violations_factory(["Test warning"]),
+            errors: violations_factory(["Test error"]),
+            messages: violations_factory(["Test message"]),
             new_comment: true
           )
         end
@@ -233,13 +238,13 @@ RSpec.describe Danger::RequestSources::GitLab, host: :gitlab do
 
           @comments_stub = stub_merge_request_comments(
             "merge_request_593728_comments_no_stickies_response",
-            "k0nserv/danger-test",
+            "k0nserv%2Fdanger-test",
             593_728
           )
         end
 
         it "removes the previous danger comment if there are no new messages" do
-          stub_request(:delete, "https://gitlab.com/api/v3/projects/k0nserv%2Fdanger-test/merge_requests/593728/notes/13471894").with(
+          stub_request(:delete, "https://gitlab.com/api/v4/projects/k0nserv%2Fdanger-test/merge_requests/593728/notes/13471894").with(
             headers: expected_headers
           )
 

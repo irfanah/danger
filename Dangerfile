@@ -12,7 +12,7 @@ end
 message(":tada:") if is_version_bump && github.pr_author != "orta"
 
 # Make a note about contributors not in the organization
-unless github.api.organization_member?('danger', github.pr_author)
+unless github.api.organization_member?("danger", github.pr_author)
   message "@#{github.pr_author} is not a contributor yet, would you like to join the Danger org?"
 
   # Pay extra attention if they modify the gemspec
@@ -58,16 +58,15 @@ files.protect_files(path: "danger.gemspec", message: ".gemspec modified", fail_b
 
 # Ensure that our core plugins all have 100% documentation
 core_plugins = Dir.glob("lib/danger/danger_core/plugins/*.rb")
-core_lint_output = `bundle exec yard stats #{core_plugins.join ' '} --list-undoc --tag tags`
+core_lint_output = `bundle exec yard stats #{core_plugins.join " "} --list-undoc --tag tags`
 
 if !core_lint_output.include?("100.00%")
   fail "The core plugins are not at 100% doc'd - see below:", sticky: false
-  markdown "```\n#{core_lint_output}```"
 elsif core_lint_output.include? "warning"
   warn "The core plugins are have yard warnings - see below", sticky: false
   markdown "```\n#{core_lint_output}```"
 end
 
 junit.parse "junit-results.xml"
-junit.headers = [:file, :name]
+junit.headers = %i(file name)
 junit.report

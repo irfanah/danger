@@ -92,6 +92,25 @@ module Danger
       "github"
     end
 
+    # @!group PR Review
+    #
+    # In Beta. Provides access to creating a GitHub Review instead of a typical GitHub comment.
+    #
+    # To use you announce the start of your review, and the end via the `start` and `submit` functions,
+    # for example:
+    #
+    # github.review.start
+    # github.review.fail(message)
+    # github.review.warn(message)
+    # github.review.message(message)
+    # github.review.markdown(message)
+    # github.review.submit
+    #
+    # @return [ReviewDSL]
+    def review
+      @github.review
+    end
+
     # @!group PR Metadata
     # The title of the Pull Request.
     # @return [String]
@@ -205,7 +224,24 @@ module Danger
       paths.first(paths.count - 1).join(", ") + " & " + paths.last
     end
 
-    [:title, :body, :author, :labels, :json].each do |suffix|
+    # @!group GitHub Misc
+    # Use to ignore inline messages which lay outside a diff's range, thereby not posting them in the main comment.
+    # You can set hash to change behavior per each kinds. (ex. `{warning: true, error: false}`)
+    # @param    [Bool] or [Hash<Symbol, Bool>] dismiss
+    #           Ignore out of range inline messages, defaults to `true`
+    #
+    # @return   [void]
+    def dismiss_out_of_range_messages(dismiss = true)
+      if dismiss.kind_of?(Hash)
+        @github.dismiss_out_of_range_messages = dismiss
+      elsif dismiss.kind_of?(TrueClass)
+        @github.dismiss_out_of_range_messages = true
+      elsif dismiss.kind_of?(FalseClass)
+        @github.dismiss_out_of_range_messages = false
+      end
+    end
+
+    %i(title body author labels json).each do |suffix|
       alias_method "mr_#{suffix}".to_sym, "pr_#{suffix}".to_sym
     end
 

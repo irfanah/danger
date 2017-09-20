@@ -1,6 +1,6 @@
 # https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-JenkinsSetEnvironmentVariables
 # https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin
-require "danger/request_sources/github"
+require "danger/request_sources/github/github"
 require "danger/request_sources/gitlab"
 require "danger/request_sources/bitbucket_server"
 require "danger/request_sources/bitbucket_cloud"
@@ -28,6 +28,11 @@ module Danger
   # in order to ensure that you have the build environment set up for MR integration.
   #
   # With that set up, you can edit your job to add `bundle exec danger` at the build action.
+  #
+  # #### General
+  #
+  # People occasionally see issues with Danger not classing your CI runs as a PR, to give you visibilty
+  # the Jenkins side of Danger expects to see one of these env vars: ghprbPullId, CHANGE_ID or gitlabMergeRequestId
   #
   # ### Token Setup
   #
@@ -62,8 +67,13 @@ module Danger
       self.repo_url = self.class.repo_url(env)
       self.pull_request_id = self.class.pull_request_id(env)
 
-      repo_matches = self.repo_url.match(%r{([\/:])([^\/]+\/[^\/.]+)(?:.git)?$})
-      self.repo_slug = repo_matches[2] unless repo_matches.nil?
+      repo_matches = self.repo_url.match(%r{(?:[\/:])projects\/([^\/.]+)\/repos\/([^\/.]+)}) # Bitbucket Server
+      if repo_matches
+        self.repo_slug = "#{repo_matches[1]}/#{repo_matches[2]}"
+      else
+        repo_matches = self.repo_url.match(%r{([\/:])([^\/]+\/[^\/]+)$})
+        self.repo_slug = repo_matches[2].gsub(/\.git$/, "") unless repo_matches.nil?
+      end
     end
 
     def self.pull_request_id(env)

@@ -1,6 +1,184 @@
 ## master
 
-* Add your own contribution below
+* Fix removing comments when one danger_id is a substring of another - [@marcelofabri](https://github.com/marcelofabri)
+
+## 5.4.3
+
+* Add support for [Codeship](https://codeship.com/) - [@ghiculescu](https://github.com/ghiculescu)
+
+## 5.4.2
+
+* Fix `Violation#to_s` showing file and line when they are empty and not showing when they are set
+
+## 5.4.1
+
+* Adds VSTS Dangerfile plugin - [@petester42](https://github.com/petester42)
+* Add support to pass in `DANGER_OCTOKIT_VERIFY_SSL` to toggle SSL Verification for Octokit - [@nikhilsh](https://github.com/nikhilsh)
+
+## 5.4.0
+
+* Add support for VSTS - [@petester42](https://github.com/petester42)
+
+## 5.3.5
+
+* Tightens up pronouns in `danger init`.
+* Add `--verify-ssl` option to bypass Octokit's SSL Verification - [@nikhilsh](https://github.com/nikhilsh)
+* Add `no_proxy_fix` gem as Ruby's no proxy is not working in `2.4.0/2.4.1` - [@nikhilsh](https://github.com/nikhilsh)
+
+## 5.3.4
+
+This release adds compatibility for GitLab API v4, you need to update the [danger-gitlab gem](https://github.com/danger/danger-gitlab-gem) to be version `6.x` when you migrate to the new API. 👍
+
+* Add actual support for [buddybuild](https://buddybuild.com) - [@palleas](https://github.com/palleas)
+* Add ability to add multiple messages - [@sleekybadger](https://github.com/sleekybadger)
+* Use gitlab api v4, instead of deprecated v3 - [@sleekybadger](https://github.com/sleekybadger)
+* Add support for GitLabCI - [@sleekybadger](https://github.com/sleekybadger)
+
+
+## 5.3.3
+
+* Add to documentation for TeamCity CI setup - [@atelic](https://github.com/atelic)
+* Show more error detail for UnprocessableEntity - [@litmon](https://github.com/litmon)
+* Use latest [octokit](https://github.com/octokit/octokit.rb) pr reviews functionality - [@antondomashnev](https://github.com/antondomashnev)
+
+## 5.3.2
+
+* Fix plugins search list to gitlab - [@leonhartX](https://github.com/leonhartX)
+* Explicitly encode the results of `git` executions in UTF-8 - [@nikhilmat](https://github.com/nikhilmat)
+* Adds BitbucketServer to XcodeServer's supported_request_sources
+[@anreitersimon](https://github.com/anreitersimon)
+
+## 5.3.1
+
+* Fixes for duplicated GitHub inline comments - [@litmon](https://github.com/litmon)
+* Fix wrong commits count for PR's that have more than 30 commits - [@sleekybadger](https://github.com/sleekybadger)
+* Fix markdown links to files in messages - [@ffittschen](https://github.com/ffittschen)
+
+## 5.3.0
+
+* Improve remotes parsing for init command - [@sleekybadger](https://github.com/sleekybadger)
+* Adds ability to get the whole diff object at `git.diff` - This lets you do
+  more fine grained checks on the raw changes. - [@sleekybadger](https://github.com/sleekybadger)
+* Add ability to set dismiss_out_of_range_messages per each message kinds. - [@giginet](https://github.com/giginet)
+
+## 5.2.2
+
+* Fix FileList returning arrays - [@sleekybadger](https://github.com/sleekybadger)
+* Fix broken violations order for github - [@sleekybadger](https://github.com/sleekybadger)
+
+## 5.2.1
+
+* Add ability to get list of renamed files - [@sleekybadger](https://github.com/sleekybadger)
+
+## 5.2.0
+
+* Add support for DotCi - Daniel Beard
+* Send Dangerfile eval exceptions to PR - [@sleekybadger](https://github.com/sleekybadger)
+
+## 5.1.1
+
+* Consider all comments when looking for existing danger comments in Gitlab MRs.
+
+## 5.1.0
+
+* Improved DroneCI support for versions 0.4+ - [@fmartingr](https://github.com/fmartingr)
+* Made DroneCI still work with older version - [@k0nserv](https://github.com/k0nserv)
+
+
+## 5.0.3
+
+* Automates the add GitHub release notes when we release via [chandler](https://github.com/mattbrictson/chandler) - orta
+* Updates Danger's tests to use the gitlab 4.0 gem - orta
+* #790 Fixes issue with BitbucketServer crashing when `DANGER_BITBUCKETSERVER_HOST` is not set - orta
+
+## 5.0.2
+
+* #787 Fixes issue with `use_ssl` for bitbucket server integration. - RishabhTayal
+* #788 Fix `diff_for_file` for added files - allewun
+
+
+## 5.0.1
+
+* #785 Added support for `http://` for bitbucket server integration. - RishabhTayal
+
+## 5.0.0
+
+* #681, #498 - Fixes handling of files moved across directories by using diff to get list of modified files. Please note that the fix is not backward-compatible due to moved files names being the original file names - nikolaykasyanov
+
+  This is very likely not break any Dangerfiles out there, but it's better to be safe. So we're bumping the version number to let everyone know there _could_ be a risk. - orta
+
+## 4.3.4
+
+* #775 Fixed calling undefined method `start_with`
+
+## 4.3.4
+
+* Fix danger init - Kohki Miki
+
+## 4.3.3
+
+* `danger.import_dangerfile(github:)` now supports private repositories and GitHub Enterprise - hotbott
+
+
+## 4.3.2
+
+* Change from `git fetch --unshallow` to `git fetch --depth=1000000` - Juanito Fatas
+
+## 4.3.1
+
+* Fix find inline comment position at the last line of diff - leonhartX
+* Add inline comments to changed lines only when `dismiss_out_of_range_message` is enabled - leonhartX
+* Add documentation for [buddybuild](https://www.buddybuild.com) - sunshinejr
+
+## 4.3.0
+
+* Minor changes to the danger Gemfile - orta
+* Make danger pr & local commands recognize -h to print help - Juanito Fatas
+* Fix inline comment url when using github enterprise - leonhartX
+* Fix repo slug `nil` when using a GitHub repo that contains dot in name - johnlinvc
+* Fix find wrong diff position for inline comment - leonhartX
+* Add `dismiss_out_of_range_messages` option to `github` plugin to support inline comments only, instead of moving them into the main comment - leonhartX
+* Fix inline comment url when using github enterprise - leonhartX
+* Fix repo slug `nil` when using a GitHub repo that contains dot in name - johnlinvc
+* Fix find wrong diff position for inline comment - leonhartX
+* gitlab project names dont need to be urlencoded anymore - hanneskaeufler
+* Fix inline comment failed to fall back when there is only inline comments - leonhartX
+* Fix only inline markdown comments will fall back to main comment even in diff's range - leonhartX
+
+## 4.2.2
+
+* Improved support for [Bitbucket Branch Source Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Bitbucket+Branch+Source+Plugin) - bartoszj
+* Refactoring of `danger local` and `danger pr` commands - hanneskaeufler
+* Fixes crash of `danger local` with github enterprise hosts - hanneskaeufler
+
+## 4.2.1
+
+* Fixed an issue that broke markdown rendering in Github comments - turekj
+
+## 4.2.0
+
+* Use the colored2 gem instead of colored - orta
+* Add summary to dangers comment to show in e.g. slack - hanneskaeufler
+
+## 4.1.1
+
+* Minor docs formatting change - orta
+
+## 4.1.0
+
+* PR Review in Beta. Provides access to creating a GitHub Review instead of a typical GitHub comment - antondomashnev
+
+ To use you announce the start of your review, and the end via the `start` and submit` functions,
+ for example:
+
+  ```ruby
+  github.review.start
+  github.review.fail("Please add a CHANGELOG entry") if has_no_changelog
+  github.review.warn("Highway to the Danger Zone") if pr_includes_word_danger
+  github.review.message("You might want to read #{url}") if may_require_docs
+  github.review.markdown("Please update your changelog entry according an #{\example}") if changelog_format_not_valid
+  github.review.submit
+  ```
 
 ## 4.0.5
 

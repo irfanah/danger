@@ -1,8 +1,8 @@
 # coding: utf-8
+
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "danger/version"
-# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |spec|
   spec.name          = "danger"
   spec.version       = Danger::VERSION
@@ -23,13 +23,14 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "claide", "~> 1.0"
   spec.add_runtime_dependency "claide-plugins", ">= 0.9.2"
   spec.add_runtime_dependency "git", "~> 1"
-  spec.add_runtime_dependency "colored", "~> 1.2"
+  spec.add_runtime_dependency "colored2", "~> 3.1"
   spec.add_runtime_dependency "faraday", "~> 0.9"
   spec.add_runtime_dependency "faraday-http-cache", "~> 1.0"
-  spec.add_runtime_dependency "octokit", "~> 4.2"
+  spec.add_runtime_dependency "octokit", "~> 4.7"
   spec.add_runtime_dependency "kramdown", "~> 1.5"
   spec.add_runtime_dependency "terminal-table", "~> 1"
   spec.add_runtime_dependency "cork", "~> 0.1"
+  spec.add_runtime_dependency "no_proxy_fix"
 
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
@@ -39,7 +40,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry", "~> 0.10"
   spec.add_development_dependency "pry-byebug"
 
-  spec.add_development_dependency "rubocop", "~> 0.44"
+  spec.add_development_dependency "rubocop", "~> 0.46.0"
   spec.add_development_dependency "yard", "~> 0.8"
 
   spec.add_development_dependency "listen", "3.0.7"

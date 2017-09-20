@@ -22,7 +22,7 @@ module Danger
   #
   # @example Warn when there are merge commits in the diff
   #
-  #          if commits.any? { |c| c.message =~ /^Merge branch 'master'/ }
+  #          if git.commits.any? { |c| c.message =~ /^Merge branch 'master'/ }
   #            warn 'Please rebase to get rid of the merge commits in this PR'
   #          end
   #
@@ -72,7 +72,23 @@ module Danger
     # @return [FileList<String>] an [Array] subclass
     #
     def modified_files
-      Danger::FileList.new(@git.diff.stats[:files].keys)
+      Danger::FileList.new(@git.diff.select { |diff| diff.type == "modified" }.map(&:path))
+    end
+
+    # @!group Git Metadata
+    # List of renamed files
+    # @return [Array<Hash>] with keys `:before` and `:after`
+    #
+    def renamed_files
+      @git.renamed_files
+    end
+
+    # @!group Git Metadata
+    # Whole diff
+    # @return [Git::Diff] from the gem `git`
+    #
+    def diff
+      @git.diff
     end
 
     # @!group Git Metadata
@@ -112,7 +128,7 @@ module Danger
     # @return [Git::Diff::DiffFile] from the gem `git`
     #
     def diff_for_file(file)
-      modified_files.include?(file) ? @git.diff[file] : nil
+      (added_files + modified_files).include?(file) ? @git.diff[file] : nil
     end
 
     # @!group Git Metadata

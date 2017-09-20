@@ -1,6 +1,19 @@
 require "danger/commands/pr"
+require "open3"
 
 RSpec.describe Danger::PR do
+  context "prints help" do
+    it "danger pr --help flag prints help" do
+      stdout, = Open3.capture3("danger pr -h")
+      expect(stdout).to include "Usage"
+    end
+
+    it "danger pr -h prints help" do
+      stdout, = Open3.capture3("danger pr -h")
+      expect(stdout).to include "Usage"
+    end
+  end
+
   describe ".summary" do
     it "returns the summary for PR command" do
       result = described_class.summary
@@ -28,6 +41,7 @@ RSpec.describe Danger::PR do
       expect(result).to include ["--clear-http-cache", "Clear the local http cache before running Danger locally."]
       expect(result).to include ["--pry", "Drop into a Pry shell after evaluating the Dangerfile."]
       expect(result).to include ["--dangerfile=<path/to/dangerfile>", "The location of your Dangerfile"]
+      expect(result).to include ["--verify-ssl", "Verify SSL in Octokit"]
     end
 
     it "dangerfile can be set" do
@@ -43,14 +57,15 @@ RSpec.describe Danger::PR do
   end
 
   context "default options" do
-    it "pr url is nil and clear_http_cache defaults to false" do
+    it "pr url is nil, clear_http_cache defaults to false and verify-ssl defaults to true" do
       argv = CLAide::ARGV.new([])
 
       result = described_class.new(argv)
 
       expect(result).to have_instance_variables(
         "@pr_url" => nil,
-        "@clear_http_cache" => false
+        "@clear_http_cache" => false,
+        "@verify_ssl" => true
       )
     end
   end
